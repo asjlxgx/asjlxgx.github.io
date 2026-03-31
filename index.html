@@ -1,264 +1,162 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>国轩社区 - 资源社区</title>
-    <style>
-        /* === 全局样式 === */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
-            padding-bottom: 60px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>清幽谷</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{background:#000;color:#fff;padding-bottom:70px}
 
-        /* === 顶部状态栏 === */
-        .status-bar {
-            height: 20px;
-            background: #000;
-            color: #fff;
-            font-size: 12px;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 10px;
-            align-items: center;
-        }
+.header{display:flex;padding:16px;gap:10px;align-items:center}
+.logo{font-size:20px;font-weight:bold}
+.search{flex:1;background:#1a1a1a;padding:10px 14px;border-radius:30px}
+.login{background:#11C28C;color:#000;padding:10px 16px;border-radius:10px;border:none;font-weight:bold}
 
-        /* === 顶部导航 === */
-        .header {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            background: #fff;
-            border-bottom: 1px solid #eee;
-        }
-        .avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #ccc;
-            margin-right: 10px;
-        }
-        .search-box {
-            flex: 1;
-            background: #f0f0f0;
-            border-radius: 15px;
-            padding: 5px 10px;
-            display: flex;
-            align-items: center;
-            color: #999;
-        }
-        .menu-icon {
-            font-size: 20px;
-            margin-left: 10px;
-        }
+.tabs{display:flex;gap:16px;padding:10px 16px;overflow-x:auto}
+.tab{color:#777;font-size:16px;white-space:nowrap}
+.tab.active{color:#11C28C}
 
-        /* === 分类标签 === */
-        .tabs {
-            display: flex;
-            background: #fff;
-            border-bottom: 1px solid #eee;
-        }
-        .tabs a {
-            padding: 10px 15px;
-            text-decoration: none;
-            color: #333;
-            font-size: 16px;
-        }
-        .tabs a.active {
-            color: #ff5000;
-            border-bottom: 2px solid #ff5000;
-        }
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:20px 16px;text-align:center}
+.grid-icon{width:50px;height:50px;background:#1a1a1a;border-radius:14px;margin:0 auto 6px;display:grid;place-items:center;font-size:24px}
 
-        /* === 内容区 === */
-        .content {
-            padding: 10px;
-        }
-        .banner {
-            width: 100%;
-            height: 100px;
-            background: #00aaff;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 18px;
-        }
-        .icon-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-        }
-        .icon-item {
-            width: 20%;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        .icon-item img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #ffcc00;
-            margin-bottom: 5px;
-        }
-        .icon-item span {
-            font-size: 12px;
-            color: #333;
-        }
+.page{display:none;padding:16px}
+.page.active{display:block}
 
-        /* === 用户动态 === */
-        .post {
-            background: #fff;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
-            border: 1px solid #eee;
-        }
-        .post-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        .post-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #ccc;
-            margin-right: 10px;
-        }
-        .post-info {
-            flex: 1;
-        }
-        .post-name {
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .post-time {
-            font-size: 12px;
-            color: #999;
-        }
-        .post-content {
-            font-size: 14px;
-            color: #333;
-        }
+.item{background:#111;border-radius:12px;margin-bottom:10px}
+.item img,.item video{width:100%;display:block}
+.item .name{padding:10px}
 
-        /* === 底部导航 === */
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #fff;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            border-top: 1px solid #eee;
-        }
-        .footer-item {
-            text-align: center;
-            color: #666;
-            font-size: 12px;
-        }
-        .footer-item.active {
-            color: #ff5000;
-        }
-        .footer-icon {
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-    </style>
+#file{display:none}
+.btn{background:#11C28C;color:#000;width:100%;padding:14px;border:none;border-radius:12px;margin-top:10px}
+
+#tip{margin:10px;padding:12px;border-radius:12px;text-align:center;font-weight:bold;display:none}
+
+.footer{position:fixed;bottom:0;left:0;right:0;height:60px;background:#0a0a0a;display:flex;justify-content:space-around;align-items:center}
+.footer-item{color:#777;font-size:12px;text-align:center}
+</style>
 </head>
 <body>
-    
 
-    <!-- 顶部导航 -->
-    <header class="header">
-        <div class="avatar"></div>
-        <div class="search-box">国轩社</div>
-        <div class="menu-icon">☰</div>
-    </header>
+<div class="header">
+  <div class="logo">清幽谷</div>
+  <div class="search">搜索</div>
+  <button class="login">登录</button>
+</div>
 
-    <!-- 分类标签 -->
-    <nav class="tabs">
-        <a href="#" class="active">最新</a>
-        <a href="#">推荐</a>
-        <a href="#">视频库</a>
-        <a href="#">免费视频</a>
-        <a href="#">图片</a>
-        <a href="#">资源</a>
-    </nav>
+<div class="tabs">
+  <div class="tab active" onclick="show('home')">首页</div>
+  <div class="tab" onclick="show('recommend')">推荐</div>
+  <div class="tab" onclick="show('video')">视频</div>
+  <div class="tab" onclick="show('upload')">上传</div>
+  <div class="tab" onclick="show('my')">我的</div>
+</div>
 
-    <!-- 内容区 -->
-    <main class="content">
-        <!-- 横幅 -->
-        <div class="banner">相关找客服！</div>
+<div class="grid">
+  <div><div class="grid-icon">📱</div><div>APP</div></div>
+  <div><div class="grid-icon">📖</div><div>小说</div></div>
+  <div><div class="grid-icon">🎬</div><div>视频</div></div>
+  <div><div class="grid-icon">🖼️</div><div>图片</div></div>
+  <div><div class="grid-icon">🔥</div><div>推广</div></div>
+  <div><div class="grid-icon">🎁</div><div>免费</div></div>
+  <div><div class="grid-icon">✅</div><div>签到</div></div>
+  <div><div class="grid-icon">⭐</div><div>会员</div></div>
+</div>
 
-        <!-- 图标网格 -->
-        <div class="icon-grid">
-            <div class="icon-item"><div class="icon-item"><img src="#" alt="APP"><span>APP</span></div>
-            <div class="icon-item"><img src="#" alt="小说"><span>小说</span></div>
-            <div class="icon-item"><img src="#" alt="视频"><span>视频</span></div>
-            <div class="icon-item"><img src="#" alt="图片"><span>图片</span></div>
-            <div class="icon-item"><img src="#" alt="推广"><span>推广</span></div>
-            <div class="icon-item"><img src="#" alt="免费视频"><span>免费视频</span></div>
-            <div class="icon-item"><img src="#" alt="签到"><span>签到</span></div>
-            <div class="icon-item"><img src="#" alt="会员"><span>会员</span></div>
-        </div>
+<div id="tip"></div>
 
-        <!-- 用户动态 -->
-        <div class="post">
-            <div class="post-header">
-                <div class="post-avatar"></div>
-                <div class="post-info">
-                    <div class="post-name">老幺变老妖</div>
-                    <div class="post-time">2025-03-24 17:16 · 手机端 · 公开内容</div>
-                </div>
-            </div>
-            <div class="post-content">
-                这里是用户发布的内容...
-            </div>
-        </div>
-    </main>
+<div id="home" class="page active"></div>
+<div id="recommend" class="page"></div>
+<div id="video" class="page"></div>
 
-    <!-- 底部导航 -->
-    <footer class="footer">
-        <div class="footer-item active">
-            <div class="footer-icon">🏠</div>
-            <div>首页</div>
-        </div>
-        <div class="footer-item">
-            <div class="footer-icon">💬</div>
-            <div>消息</div>
-        </div>
-        <div class="footer-item">
-            <div class="footer-icon">➕</div>
-            <div>发布</div>
-        </div>
-        <div class="footer-item">
-            <div class="footer-icon">🔍</div>
-            <div>发现</div>
-        </div>
-        <div class="footer-item">
-            <div class="footer-icon">👤</div>
-            <div>我的</div>
-        </div>
-    </footer>
+<div id="upload" class="page">
+  <input type="file" id="file" accept="image/*,video/*" multiple>
+  <button class="btn" onclick="selectFile()">选择文件（可多选）</button>
+  <button class="btn" onclick="upload()">上传</button>
+</div>
 
-    <script>
-        // 简单的交互：点击图标变色
-        document.querySelectorAll('.icon-item').forEach(item => {
-            item.addEventListener('click', () => {
-                alert('点击了：' + item.querySelector('span').innerText);
-            });
-        });
-    </script>
+<div id="my" class="page">
+  <div id="myList"></div>
+</div>
+
+<div class="footer">
+  <div class="footer-item" onclick="show('home')">🏠 首页</div>
+  <div class="footer-item" onclick="show('msg')">💬 消息</div>
+  <div class="footer-item" onclick="show('upload')">📤 上传</div>
+  <div class="footer-item" onclick="show('find')">🔍 发现</div>
+  <div class="footer-item" onclick="show('my')">👤 我的</div>
+</div>
+
+<script>
+let files = [];
+const tip = document.getElementById('tip');
+
+function show(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  tip.style.display = 'none';
+}
+
+function selectFile() {
+  document.getElementById('file').click();
+  document.getElementById('file').onchange = e => {
+    files = Array.from(e.target.files);
+    tip.style.display = 'block';
+    tip.style.background = '#11C28C';
+    tip.innerText = '✅ 已选择 ' + files.length + ' 个文件';
+  }
+}
+
+async function upload() {
+  if (files.length === 0) {
+    tip.style.display = 'block';
+    tip.style.background = '#ff4444';
+    tip.innerText = '❌ 请选择文件';
+    return;
+  }
+
+  tip.style.display = 'block';
+  tip.style.background = '#11C28C';
+  tip.innerText = '⏳ 上传中...';
+
+  let list = JSON.parse(localStorage.getItem('myList') || '[]');
+
+  for (let file of files) {
+    const url = await readFile(file);
+    list.unshift({
+      url,
+      name: file.name,
+      isImg: file.type.startsWith('image/')
+    });
+  }
+
+  localStorage.setItem('myList', JSON.stringify(list));
+
+  tip.style.innerText = '✅ 全部上传成功！';
+  setTimeout(() => show('my'), 1000);
+  loadMyList();
+  files = [];
+}
+
+function readFile(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadMyList() {
+  const arr = JSON.parse(localStorage.getItem('myList') || '[]');
+  document.getElementById('myList').innerHTML = arr.map(item => `
+    <div class="item">
+      ${item.isImg ? `<img src="${item.url}">` : `<video controls src="${item.url}"></video>`}
+      <div class="name">${item.name}</div>
+    </div>
+  `).join('');
+}
+
+window.onload = loadMyList;
+</script>
 </body>
 </html>
