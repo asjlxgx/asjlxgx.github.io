@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>清幽谷 - 稳定版</title>
+<title>清幽谷 - 混合存储版</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
 body{background:#000;color:#fff;padding-bottom:80px;-webkit-tap-highlight-color:transparent}
@@ -119,14 +119,16 @@ body{background:#000;color:#fff;padding-bottom:80px;-webkit-tap-highlight-color:
 
 <div id="upload" class="page">
   <div style="background:#111;padding:20px;border-radius:16px">
-      <h3 style="margin-bottom:15px;color:#11C28C">添加资源</h3>
+      <h3 style="margin-bottom:15px;color:#11C28C">☁️ 添加云端链接 (永久)</h3>
+      <p style="color:#666;font-size:12px;margin-bottom:10px">输入视频/图片的网络地址，换手机也能看</p>
       <input class="input" id="linkUrl" placeholder="粘贴视频/图片链接">
       <input class="input" id="linkName" placeholder="资源标题">
-      <button class="upload-btn" onclick="addByLink()">添加链接</button>
+      <button class="upload-btn" onclick="addByLink()">保存到云端</button>
   </div>
+  
   <div style="background:#111;padding:20px;border-radius:16px;margin-top:20px">
-      <h3 style="margin-bottom:15px;color:#11C28C">上传本地文件</h3>
-      <p style="color:#666;font-size:12px;margin-bottom:10px">*注意：本地存储有限，建议小文件</p>
+      <h3 style="margin-bottom:15px;color:#11C28C">📱 上传本地文件 (临时)</h3>
+      <p style="color:#666;font-size:12px;margin-bottom:10px">*注意：占用手机空间，换设备会丢失</p>
       <input type="file" id="file" accept="image/*,video/*" multiple>
       <button type="button" class="upload-btn" onclick="selectFile()">选择文件</button>
       <button type="button" class="upload-btn" onclick="uploadLocal()">上传</button>
@@ -146,6 +148,7 @@ body{background:#000;color:#fff;padding-bottom:80px;-webkit-tap-highlight-color:
   <div class="footer-item" onclick="goMy()"><span>👤</span>我的</div>
 </div>
 
+<!-- 你的 JavaScript 代码 -->
 <script>
 let isReg = false
 let files = []
@@ -213,7 +216,7 @@ function show(id){
 function goUpload(){ if(checkLogin()) show('upload') }
 function goMy(){ if(checkLogin()){ show('my'); loadMy() } }
 
-// --- 功能：添加链接 ---
+// --- 添加链接（云端永久存储） ---
 function addByLink(){
     if(!checkLogin()) return
     let url = linkUrl.value.trim()
@@ -222,21 +225,21 @@ function addByLink(){
     if(!url || !name){ alert('请填写标题和链接'); return }
     
     let user = localStorage.getItem('loginUser')
-    let list = JSON.parse(localStorage.getItem('files_'+user) || '[]')
+    let list = JSON.parse(localStorage.getItem('files_cloud_' + user) || '[]')
     
-    let isImg = url.match(/\.(jpeg|jpg|gif|png|webp)$/) != null
+    let isImg = url.match(/\.(jpeg|jpg|gif|png|webp|mp4|mov|avi|mkv)$/) != null
     
     list.unshift({ url: url, name: name, isImg: isImg, isLink: true })
     
-    localStorage.setItem('files_'+user, JSON.stringify(list))
-    alert('添加成功！')
+    localStorage.setItem('files_cloud_' + user, JSON.stringify(list))
+    alert('✅ 云端添加成功！换设备也不丢')
     linkUrl.value = ''
     linkName.value = ''
     show('my')
     loadMy()
 }
 
-// --- 功能：本地上传 ---
+// --- 选择文件 ---
 function selectFile(){
   file.click()
   file.onchange = (e)=>{
@@ -246,48 +249,62 @@ function selectFile(){
   }
 }
 
+// --- 本地上传（仅演示，大文件用云端） ---
 async function uploadLocal(){
+  alert('⚠️ 本地上传仅临时保存，换设备会丢失\n👉 建议使用【添加链接】模式实现永久云端存储')
   if(!checkLogin()) return
   if(files.length === 0){ alert('请选择文件'); return }
 
   let user = localStorage.getItem('loginUser')
-  let list = JSON.parse(localStorage.getItem('files_'+user) || '[]')
+  let list = JSON.parse(localStorage.getItem('files_' + user) || '[]')
 
   for(let f of files){
     try{
         let url = await readAsBase64(f)
-        list.unshift({ url, name:f.name, isImg:f.type.startsWith('image/'), isLink: false })
+        list.unshift({ 
+            url: url, 
+            name: f.name, 
+            isImg: f.type.startsWith('image/'), 
+            isLink: false 
+        })
     }catch(e){
-        alert('文件太大，无法存入本地，请使用"添加链接"功能')
+        alert('文件过大，无法本地保存')
         return
     }
   }
 
-  localStorage.setItem('files_'+user, JSON.stringify(list))
-  tip.innerText='上传成功'
-  setTimeout(()=>{ show('my'); loadMy() },1000)
+  localStorage.setItem('files_' + user, JSON.stringify(list))
+  tip.innerText = '✅ 本地保存成功'
+  setTimeout(()=>{ show('my'); loadMy() }, 1200)
   files = []
 }
 
-// --- 功能：渲染列表 ---
+// --- 加载云端 + 本地资源 ---
 function loadMy(){
+  if(!checkLogin()) return
   let user = localStorage.getItem('loginUser')
-  let arr = JSON.parse(localStorage.getItem('files_'+user) || '[]')
   
-  let clearBtn = `<button class="upload-btn" style="background:#ff4444;margin-bottom:15px" onclick="clearAll()">🗑️ 清空所有资源</button>`;
+  // 云端数据（永久）
+  let cloudList = JSON.parse(localStorage.getItem('files_cloud_' + user) || '[]')
+  // 本地数据（临时）
+  let localList = JSON.parse(localStorage.getItem('files_' + user) || '[]')
+  // 合并
+  let arr = [...cloudList, ...localList]
+
+  let clearBtn = `<button class="upload-btn" style="background:#ff4444;margin-bottom:15px" onclick="clearAll()">🗑️ 清空所有</button>`
   
   if(arr.length === 0){
       myList.innerHTML = clearBtn + '<div style="text-align:center;color:#555;margin-top:40px">暂无资源</div>'
       return
   }
 
-  let listHtml = arr.map((item,idx)=>`
+  let listHtml = arr.map((item, idx) => `
     <div class="item">
       <button type="button" class="del" onclick="del(${idx})">×</button>
       ${item.isImg 
         ? `<img src="${item.url}" onclick="openLightbox('${item.url}', 'img')">` 
-        : `<video controls src="${item.url}" onclick="toggleVideo(this)"></video>`}
-      <div class="name">${item.name}</div>
+        : `<video controls src="${item.url}"></video>`}
+      <div class="name">${item.name} ${item.isLink ? '(☁️云端)' : '(本地)'}</div>
     </div>
   `).join('')
 
@@ -298,39 +315,37 @@ function loadMy(){
 function del(idx){
   if(!confirm('确定删除？')) return
   let user = localStorage.getItem('loginUser')
-  let arr = JSON.parse(localStorage.getItem('files_'+user) || '[]')
-  arr.splice(idx,1)
-  localStorage.setItem('files_'+user, JSON.stringify(arr))
+  let cloud = JSON.parse(localStorage.getItem('files_cloud_' + user) || '[]')
+  let local = JSON.parse(localStorage.getItem('files_' + user) || '[]')
+  let all = [...cloud, ...local]
+  
+  all.splice(idx, 1)
+  localStorage.setItem('files_cloud_' + user, JSON.stringify(all.filter(i => i.isLink)))
+  localStorage.setItem('files_' + user, JSON.stringify(all.filter(i => !i.isLink)))
   loadMy()
 }
 
+// --- 清空 ---
 function clearAll(){
-    if(!confirm('⚠️ 确定清空所有？')) return
-    let user = localStorage.getItem('loginUser')
-    localStorage.removeItem('files_'+user)
-    loadMy()
+  if(!confirm('⚠️ 确定清空所有？')) return
+  let user = localStorage.getItem('loginUser')
+  localStorage.removeItem('files_cloud_' + user)
+  localStorage.removeItem('files_' + user)
+  loadMy()
 }
 
 // --- 预览 ---
-function toggleVideo(video){
-    if(video.paused){ video.play() }else{ video.pause() }
-}
-
 function openLightbox(src, type){
     const lb = document.getElementById('lightbox')
     const content = document.getElementById('lightbox-content')
-    if(type === 'img'){
-        content.innerHTML = `<img src="${src}">`
-    }else{
-        content.innerHTML = `<video controls src="${src}" style="max-width:100%"></video>`
-    }
+    content.innerHTML = type === 'img' 
+      ? `<img src="${src}">` 
+      : `<video controls src="${src}" style="max-width:100%"></video>`
     lb.style.display = 'flex'
 }
 
 function closeLightbox(){
     document.getElementById('lightbox').style.display = 'none'
-    const video = document.querySelector('#lightbox video')
-    if(video) video.pause()
 }
 
 function readAsBase64(file){
@@ -341,7 +356,6 @@ function readAsBase64(file){
   })
 }
 
-// 初始化
 window.onload = updateUser
 </script>
 </body>
