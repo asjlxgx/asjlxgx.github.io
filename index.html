@@ -1,157 +1,268 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>我的媒体库（永久保存·可查看）</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-body{background:#f0f2f5;padding:20px}
-.container{max-width:800px;margin:40px auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 5px 20px rgba(0,0,0,0.05)}
-.header{background:#2563eb;color:white;padding:28px 30px}
-.header h1{font-size:26px}
-.main{padding:30px}
-.upload-box{border:2px dashed #cbd5e1;padding:50px 20px;text-align:center;border-radius:16px;background:#fafbfb;cursor:pointer;transition:all 0.3s}
-.upload-box:hover{border-color:#2563eb;background:#f7faff}
-#file{display:none}
-.btn{background:#2563eb;color:white;border:none;padding:16px;border-radius:12px;width:100%;margin-top:24px;font-size:16px;font-weight:500;cursor:pointer;transition:background 0.3s}
-.btn:hover{background:#1d4ed8}
-.status{margin-top:16px;font-size:15px;color:#1f2937;padding:12px 16px;background:#e6f7ff;border-radius:10px}
-.preview-area{margin-top:24px}
-video,img{width:100%;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
-.media-list{margin-top:40px}
-.media-list h3{font-size:18px;color:#1f2937;margin-bottom:16px}
-.media-item{padding:14px 16px;background:#f8f9fa;border-radius:12px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
-.media-item .name{flex:1;color:#1f2937;font-weight:500;word-break:break-all}
-.media-item .view-btn{background:#2563eb;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px}
-.media-item .del-btn{background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>清幽谷 - 资源社区</title>
+    <style>
+        /* === 全局样式 === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            padding-bottom: 60px;
+        }
+
+        /* === 顶部状态栏 === */
+        .status-bar {
+            height: 20px;
+            background: #000;
+            color: #fff;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            align-items: center;
+        }
+
+        /* === 顶部导航 === */
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+        }
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ccc;
+            margin-right: 10px;
+        }
+        .search-box {
+            flex: 1;
+            background: #f0f0f0;
+            border-radius: 15px;
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+            color: #999;
+        }
+        .menu-icon {
+            font-size: 20px;
+            margin-left: 10px;
+        }
+
+        /* === 分类标签 === */
+        .tabs {
+            display: flex;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+        }
+        .tabs a {
+            padding: 10px 15px;
+            text-decoration: none;
+            color: #333;
+            font-size: 16px;
+        }
+        .tabs a.active {
+            color: #ff5000;
+            border-bottom: 2px solid #ff5000;
+        }
+
+        /* === 内容区 === */
+        .content {
+            padding: 10px;
+        }
+        .banner {
+            width: 100%;
+            height: 100px;
+            background: #00aaff;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+        }
+        .icon-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+        .icon-item {
+            width: 20%;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .icon-item img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ffcc00;
+            margin-bottom: 5px;
+        }
+        .icon-item span {
+            font-size: 12px;
+            color: #333;
+        }
+
+        /* === 用户动态 === */
+        .post {
+            background: #fff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+        }
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .post-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #ccc;
+            margin-right: 10px;
+        }
+        .post-info {
+            flex: 1;
+        }
+        .post-name {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .post-time {
+            font-size: 12px;
+            color: #999;
+        }
+        .post-content {
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* === 底部导航 === */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #fff;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+        }
+        .footer-item {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+        }
+        .footer-item.active {
+            color: #ff5000;
+        }
+        .footer-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 <body>
-
-<div class="container">
-  <div class="header">
-    <h1>我的媒体库（永久保存）</h1>
-  </div>
-  <div class="main">
-
-    <div class="upload-box" onclick="document.getElementById('file').click()">
-      <h3>点击选择图片/视频</h3>
-      <p>上传后永久保存，刷新不丢失，点击可查看</p>
+    <!-- 顶部状态栏 -->
+    <div class="status-bar">
+        <span>15:04</span>
+        <span>🔋 61%</span>
     </div>
 
-    <input type="file" id="file" accept="video/*,image/*">
-    <button class="btn" onclick="upload()">上传并保存</button>
+    <!-- 顶部导航 -->
+    <header class="header">
+        <div class="avatar"></div>
+        <div class="search-box">清幽谷</div>
+        <div class="menu-icon">☰</div>
+    </header>
 
-    <div class="status" id="status"></div>
-    <div class="preview-area" id="previewArea" style="display:none"></div>
+    <!-- 分类标签 -->
+    <nav class="tabs">
+        <a href="#" class="active">最新</a>
+        <a href="#">推荐</a>
+        <a href="#">视频库</a>
+        <a href="#">免费视频</a>
+        <a href="#">图片</a>
+        <a href="#">资源</a>
+    </nav>
 
-    <div class="media-list">
-      <h3>已保存媒体</h3>
-      <div id="mediaList"></div>
-    </div>
+    <!-- 内容区 -->
+    <main class="content">
+        <!-- 横幅 -->
+        <div class="banner">相关找客服！</div>
 
-  </div>
-</div>
+        <!-- 图标网格 -->
+        <div class="icon-grid">
+            <div class="icon-item"><div class="icon-item"><img src="#" alt="APP"><span>APP</span></div>
+            <div class="icon-item"><img src="#" alt="小说"><span>小说</span></div>
+            <div class="icon-item"><img src="#" alt="视频"><span>视频</span></div>
+            <div class="icon-item"><img src="#" alt="图片"><span>图片</span></div>
+            <div class="icon-item"><img src="#" alt="推广"><span>推广</span></div>
+            <div class="icon-item"><img src="#" alt="免费视频"><span>免费视频</span></div>
+            <div class="icon-item"><img src="#" alt="签到"><span>签到</span></div>
+            <div class="icon-item"><img src="#" alt="会员"><span>会员</span></div>
+        </div>
 
-<script>
-const fileInput = document.getElementById('file');
-const status = document.getElementById('status');
-const previewArea = document.getElementById('previewArea');
-const mediaList = document.getElementById('mediaList');
-let currentFile;
+        <!-- 用户动态 -->
+        <div class="post">
+            <div class="post-header">
+                <div class="post-avatar"></div>
+                <div class="post-info">
+                    <div class="post-name">老幺变老妖</div>
+                    <div class="post-time">2025-03-24 17:16 · 手机端 · 公开内容</div>
+                </div>
+            </div>
+            <div class="post-content">
+                这里是用户发布的内容...
+            </div>
+        </div>
+    </main>
 
-// 选择文件
-fileInput.onchange = (e) => {
-  currentFile = e.target.files[0];
-  status.textContent = `✅ 已选择：${currentFile.name}`;
-};
+    <!-- 底部导航 -->
+    <footer class="footer">
+        <div class="footer-item active">
+            <div class="footer-icon">🏠</div>
+            <div>首页</div>
+        </div>
+        <div class="footer-item">
+            <div class="footer-icon">💬</div>
+            <div>消息</div>
+        </div>
+        <div class="footer-item">
+            <div class="footer-icon">➕</div>
+            <div>发布</div>
+        </div>
+        <div class="footer-item">
+            <div class="footer-icon">🔍</div>
+            <div>发现</div>
+        </div>
+        <div class="footer-item">
+            <div class="footer-icon">👤</div>
+            <div>我的</div>
+        </div>
+    </footer>
 
-// 上传并转为Base64永久存储
-function upload() {
-  if (!currentFile) {
-    alert("请先选择图片或视频！");
-    return;
-  }
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const base64 = e.target.result;
-    const isImage = currentFile.type.startsWith('image/');
-    const isVideo = currentFile.type.startsWith('video/');
-
-    // 显示预览
-    previewArea.style.display = 'block';
-    previewArea.innerHTML = isImage 
-      ? `<img src="${base64}" alt="预览图">` 
-      : `<video controls src="${base64}"></video>`;
-
-    status.textContent = `✅ 上传并永久保存成功：${currentFile.name}`;
-
-    // 保存到本地存储
-    const history = JSON.parse(localStorage.getItem('mediaList') || '[]');
-    history.push({
-      name: currentFile.name,
-      data: base64,
-      type: isImage ? 'image' : 'video'
-    });
-    localStorage.setItem('mediaList', JSON.stringify(history));
-
-    renderList();
-  };
-
-  // 读取文件为Base64
-  reader.readAsDataURL(currentFile);
-}
-
-// 渲染媒体列表
-function renderList() {
-  const history = JSON.parse(localStorage.getItem('mediaList') || '[]');
-  mediaList.innerHTML = '';
-
-  history.forEach((item, index) => {
-    const div = document.createElement('div');
-    div.className = 'media-item';
-    
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'name';
-    nameSpan.textContent = item.name;
-
-    const viewBtn = document.createElement('button');
-    viewBtn.className = 'view-btn';
-    viewBtn.textContent = '查看';
-    viewBtn.onclick = () => {
-      previewArea.style.display = 'block';
-      previewArea.innerHTML = item.type === 'image' 
-        ? `<img src="${item.data}" alt="${item.name}">` 
-        : `<video controls src="${item.data}"></video>`;
-      window.scrollTo({ top: previewArea.offsetTop - 20, behavior: 'smooth' });
-    };
-
-    const delBtn = document.createElement('button');
-    delBtn.className = 'del-btn';
-    delBtn.textContent = '删除';
-    delBtn.onclick = () => {
-      if(confirm(`确定要删除 ${item.name} 吗？`)) {
-        history.splice(index, 1);
-        localStorage.setItem('mediaList', JSON.stringify(history));
-        renderList();
-        previewArea.style.display = 'none';
-      }
-    };
-
-    div.appendChild(nameSpan);
-    div.appendChild(viewBtn);
-    div.appendChild(delBtn);
-    mediaList.appendChild(div);
-  });
-}
-
-// 页面加载时恢复列表
-window.onload = () => {
-  renderList();
-  status.textContent = "📁 媒体库已加载";
-};
-</script>
+    <script>
+        // 简单的交互：点击图标变色
+        document.querySelectorAll('.icon-item').forEach(item => {
+            item.addEventListener('click', () => {
+                alert('点击了：' + item.querySelector('span').innerText);
+            });
+        });
+    </script>
 </body>
 </html>
