@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>清幽谷 - 优化版</title>
+<title>清幽谷 - 管理版</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
 body{background:#000;color:#fff;padding-bottom:80px;-webkit-tap-highlight-color:transparent}
@@ -36,19 +36,27 @@ body{background:#000;color:#fff;padding-bottom:80px;-webkit-tap-highlight-color:
 .page.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-.item{background:#111;border-radius:16px;margin-bottom:16px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.3)}
+.item{background:#111;border-radius:16px;margin-bottom:16px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.3);position:relative}
 /* 媒体样式优化 */
 .item img,.item video{width:100%;display:block;cursor:zoom-in;max-height:400px;object-fit:cover}
 .item .name{padding:12px 16px;font-size:15px;color:#eee;border-top:1px solid #222;background:#161616}
 
-/* --- 删除按钮修复 --- */
+/* --- 删除按钮样式 --- */
 .del{
-  position:absolute;top:10px;right:10px;background:rgba(255,68,68,0.9);
-  color:#fff;border:none;border-radius:50%;width:34px;height:34px;
-  font-size:20px;cursor:pointer;z-index:10;display:grid;place-items:center;
-  box-shadow:0 2px 8px rgba(0,0,0,0.4);transition:transform 0.2s
+  position:absolute;top:10px;right:10px;background:rgba(255,68,68,0.95);
+  color:#fff;border:none;border-radius:50%;width:36px;height:36px;
+  font-size:22px;cursor:pointer;z-index:10;display:grid;place-items:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.4);transition:transform 0.2s;
+  line-height:1;
 }
-.del:active{transform:scale(0.9)}
+.del:active{transform:scale(0.85)}
+
+/* --- 清空按钮样式 --- */
+.clear-all-btn{
+    background:#ff4444;color:#fff;border:none;padding:10px 20px;
+    border-radius:8px;font-size:14px;font-weight:bold;width:100%;
+    margin-bottom:15px;display:flex;align-items:center;justify-content:center;gap:5px
+}
 
 /* --- 上传按钮 --- */
 #file{display:none}
@@ -106,16 +114,6 @@ body{background:#000;color:#fff;padding-bottom:80px;-webkit-tap-highlight-color:
 </div>
 
 <!-- 宫格 -->
-<div class="grid">
-  <div><div class="grid-icon">📱</div><div>APP</div></div>
-  <div><div class="grid-icon">📖</div><div>小说</div></div>
-  <div><div class="grid-icon">🎬</div><div>视频</div></div>
-  <div><div class="grid-icon">🖼️</div><div>图片</div></div>
-  <div><div class="grid-icon">🔥</div><div>推广</div></div>
-  <div><div class="grid-icon">🎁</div><div>免费</div></div>
-  <div><div class="grid-icon">✅</div><div>签到</div></div>
-  <div><div class="grid-icon">⭐</div><div>会员</div></div>
-</div>
 
 <div id="tip"></div>
 
@@ -138,7 +136,7 @@ body{background:#000;color:#fff;padding-bottom:80px;-webkit-tap-highlight-color:
   
   <div style="background:#111;padding:20px;border-radius:16px;margin-top:20px">
       <h3 style="margin-bottom:15px;color:#11C28C">方式二：上传本地文件</h3>
-      <p style="color:#666;font-size:12px;margin-bottom:10px">*注意：本地存储有限，建议上传小文件或图片</p>
+      <p style="color:#666;font-size:12px;margin-bottom:10px">*注意：本地存储有限，建议上传小文件</p>
       <input type="file" id="file" accept="image/*,video/*" multiple>
       <button type="button" class="upload-btn" onclick="selectFile()">选择手机文件</button>
       <button type="button" class="upload-btn" onclick="uploadLocal()">上传(仅自己可见)</button>
@@ -147,6 +145,7 @@ body{background:#000;color:#fff;padding-bottom:80px;-webkit-tap-highlight-color:
 
 <!-- 我的页面 -->
 <div id="my" class="page">
+  <!-- 这里会动态插入清空按钮 -->
   <div id="myList"></div>
 </div>
 
@@ -221,15 +220,6 @@ function show(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
   document.getElementById(id).classList.add('active')
   tip.style.display = 'none'
-  
-  // 更新底部导航状态
-  document.querySelectorAll('.footer-item').forEach((item, index) => {
-      item.classList.remove('active')
-      // 简单匹配逻辑，实际开发可用更严谨的方式
-      if((id==='home' && index===0) || (id==='my' && index===4) || (id==='upload' && index===2)) {
-          item.classList.add('active')
-      }
-  })
 }
 
 function goUpload(){ if(checkLogin()) show('upload') }
@@ -246,7 +236,6 @@ function addByLink(){
     let user = localStorage.getItem('loginUser')
     let list = JSON.parse(localStorage.getItem('files_'+user) || '[]')
     
-    // 简单的图片后缀判断
     let isImg = url.match(/\.(jpeg|jpg|gif|png|webp)$/) != null
     
     list.unshift({
@@ -281,7 +270,7 @@ async function uploadLocal(){
   let user = localStorage.getItem('loginUser')
   let list = JSON.parse(localStorage.getItem('files_'+user) || '[]')
 
-  if(files.length > 3){ alert('文件较多，建议分次上传，以免浏览器崩溃'); }
+  if(files.length > 3){ alert('文件较多，建议分次上传'); }
 
   for(let f of files){
     try{
@@ -301,33 +290,37 @@ async function uploadLocal(){
   files = []
 }
 
-// --- 核心功能：渲染列表与预览 ---
+// --- 核心功能：渲染列表 ---
 function loadMy(){
   let user = localStorage.getItem('loginUser')
   let arr = JSON.parse(localStorage.getItem('files_'+user) || '[]')
   
+  // 新增：清空所有按钮
+  let clearBtn = `<button class="clear-all-btn" onclick="clearAll()">🗑️ 清空所有资源</button>`;
+  
   if(arr.length === 0){
-      myList.innerHTML = '<div style="text-align:center;color:#555;margin-top:40px">暂无资源 快去上传吧</div>'
+      myList.innerHTML = clearBtn + '<div style="text-align:center;color:#555;margin-top:40px">暂无资源 快去上传吧</div>'
       return
   }
 
-  myList.innerHTML = arr.map((item,idx)=>`
+  let listHtml = arr.map((item,idx)=>`
     <div class="item">
-      <!-- 修复删除按钮：添加 type="button" -->
       <button type="button" class="del" onclick="del(${idx})">×</button>
-      
       ${item.isImg 
         ? `<img src="${item.url}" onclick="openLightbox('${item.url}', 'img')">` 
         : `<video controls src="${item.url}" onclick="toggleVideo(this)"></video>`}
-        
       <div class="name">${item.name}</div>
     </div>
   `).join('')
+
+  myList.innerHTML = clearBtn + listHtml
 }
 
-// 修复删除功能
+// --- 删除功能 ---
+
+// 1. 删除单个
 function del(idx){
-  if(!confirm('确定删除这个资源吗？')) return
+  if(!confirm('确定要删除这个资源吗？')) return
   let user = localStorage.getItem('loginUser')
   let arr = JSON.parse(localStorage.getItem('files_'+user) || '[]')
   arr.splice(idx,1)
@@ -335,32 +328,34 @@ function del(idx){
   loadMy()
 }
 
-// 视频点击播放/暂停
-function toggleVideo(video){
-    if(video.paused){
-        video.play()
-    }else{
-        video.pause()
-    }
+// 2. 清空所有（新增）
+function clearAll(){
+    if(!confirm('⚠️ 警告：这将删除你上传的所有图片和视频，确定继续吗？')) return
+    
+    let user = localStorage.getItem('loginUser')
+    localStorage.removeItem('files_'+user) // 直接移除整个键
+    alert('已清空所有资源')
+    loadMy()
 }
 
-// 图片全屏预览
+// --- 预览功能 ---
+function toggleVideo(video){
+    if(video.paused){ video.play() }else{ video.pause() }
+}
+
 function openLightbox(src, type){
     const lb = document.getElementById('lightbox')
     const content = document.getElementById('lightbox-content')
-    
     if(type === 'img'){
         content.innerHTML = `<img src="${src}">`
     }else{
         content.innerHTML = `<video controls src="${src}" style="max-width:100%"></video>`
     }
-    
     lb.style.display = 'flex'
 }
 
 function closeLightbox(){
     document.getElementById('lightbox').style.display = 'none'
-    // 关闭时停止视频
     const video = document.querySelector('#lightbox video')
     if(video) video.pause()
 }
@@ -377,4 +372,3 @@ window.onload = updateUser
 </script>
 </body>
 </html>
-帮我预览一下
