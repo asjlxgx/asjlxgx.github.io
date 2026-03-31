@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>媒体上传</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的媒体库（永久保存）</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
 body{background:#f0f2f5;padding:20px}
@@ -18,23 +18,24 @@ video,img{width:100%;border-radius:12px;margin-top:20px}
 .status{margin-top:15px;font-size:14px;color:#333;padding:10px;background:#e6f7ff;border-radius:8px}
 .list{margin-top:30px}
 .item{padding:12px;background:#f8f9fa;border-radius:10px;margin-bottom:10px}
+.item a{color:#2563eb;text-decoration:none}
 </style>
 </head>
 <body>
 
 <div class="container">
   <div class="header">
-    <h1>视频 & 图片上传</h1>
+    <h1>我的媒体库（永久保存）</h1>
   </div>
   <div class="main">
 
     <div class="upload-box" onclick="document.getElementById('file').click()">
-      <h3>点击选择文件</h3>
-      <p>支持：图片、视频</p>
+      <h3>点击选择图片/视频</h3>
+      <p>上传后刷新不丢失</p>
     </div>
 
     <input type="file" id="file" accept="video/*,image/*">
-    <button class="btn" onclick="upload()">上传并查看</button>
+    <button class="btn" onclick="upload()">上传并保存</button>
 
     <div id="status"></div>
     <img id="img" style="display:none">
@@ -45,50 +46,75 @@ video,img{width:100%;border-radius:12px;margin-top:20px}
 </div>
 
 <script>
-let file;
 const fileInput = document.getElementById('file');
 const img = document.getElementById('img');
 const video = document.getElementById('video');
 const status = document.getElementById('status');
 const list = document.getElementById('list');
+let currentFile;
 
+// 选择文件
 fileInput.onchange = (e) => {
-  file = e.target.files[0];
-  status.innerHTML = "✅ 已选择：" + file.name;
+  currentFile = e.target.files[0];
+  status.textContent = "✅ 已选择：" + currentFile.name;
 };
 
+// 上传并保存到本地存储（永久）
 function upload() {
-  if (!file) {
-    alert("请先选择图片或视频！");
+  if (!currentFile) {
+    alert("请先选择文件！");
     return;
   }
 
-  const url = URL.createObjectURL(file);
-  const isImage = file.type.startsWith("image/");
-  const isVideo = file.type.startsWith("video/");
+  const url = URL.createObjectURL(currentFile);
+  const isImage = currentFile.type.startsWith('image/');
+  const isVideo = currentFile.type.startsWith('video/');
 
-  // 隐藏之前的
-  img.style.display = "none";
-  video.style.display = "none";
+  // 显示预览
+  img.style.display = 'none';
+  video.style.display = 'none';
 
   if (isImage) {
     img.src = url;
-    img.style.display = "block";
-    status.innerHTML = "✅ 图片上传成功：" + file.name;
+    img.style.display = 'block';
   }
-
   if (isVideo) {
     video.src = url;
-    video.style.display = "block";
-    status.innerHTML = "✅ 视频上传成功：" + file.name;
+    video.style.display = 'block';
   }
 
-  // 加到列表
-  const item = document.createElement("div");
-  item.className = "item";
-  item.innerText = "✅ " + file.name;
-  list.appendChild(item);
+  status.textContent = "✅ 上传并保存成功：" + currentFile.name;
+
+  // 保存到本地存储（永久）
+  const history = JSON.parse(localStorage.getItem('media') || '[]');
+  history.push({
+    name: currentFile.name,
+    url: url,
+    type: isImage ? 'image' : 'video'
+  });
+  localStorage.setItem('media', JSON.stringify(history));
+
+  renderList();
 }
+
+// 渲染列表（刷新不丢）
+function renderList() {
+  const history = JSON.parse(localStorage.getItem('media') || '[]');
+  list.innerHTML = '';
+  history.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    const a = document.createElement('a');
+    a.href = item.url;
+    a.target = '_blank';
+    a.textContent = item.name;
+    div.appendChild(a);
+    list.appendChild(div);
+  });
+}
+
+// 页面加载时自动显示
+window.onload = renderList;
 </script>
 </body>
 </html>
