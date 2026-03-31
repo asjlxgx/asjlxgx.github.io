@@ -2,68 +2,100 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>清幽谷 - 云端版</title>
-<!-- 引入 Supabase 的客户端库 -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>清幽谷 - 稳定版</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
-body{background:#000;color:#fff;padding-bottom:70px}
-/* 保持你原来的样式不变 */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:999;display:none}
-.box{background:#111;padding:30px;border-radius:20px;width:90%;max-width:380px}
-.box h2{margin-bottom:20px;text-align:center;color:#11C28C}
-.input{width:100%;padding:14px;background:#1a1a1a;border:none;border-radius:12px;margin-bottom:12px;color:#fff}
-.btn{width:100%;padding:14px;background:#11C28C;color:#000;border:none;border-radius:12px;font-weight:bold;margin-top:10px}
-.toggle{text-align:center;margin-top:12px;color:#777;cursor:pointer}
-.header{display:flex;padding:16px;gap:10px;align-items:center}
-.logo{font-size:20px;font-weight:bold}
-.search{flex:1;background:#1a1a1a;padding:10px 14px;border-radius:30px}
-#userInfo{color:#11C28C;font-weight:bold}
-.tabs{display:flex;gap:16px;padding:10px 16px;overflow-x:auto}
-.tab{color:#777;white-space:nowrap;cursor:pointer}
-.tab.active{color:#11C28C}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:20px;text-align:center}
-.grid-icon{width:50px;height:50px;background:#1a1a1a;border-radius:14px;display:grid;place-items:center;font-size:24px}
-.page{display:none;padding:16px}
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
+body{background:#000;color:#fff;padding-bottom:80px;-webkit-tap-highlight-color:transparent}
+
+/* --- 弹窗样式 --- */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:999;display:none;backdrop-filter:blur(5px)}
+.box{background:#1a1a1a;padding:30px;border-radius:20px;width:85%;max-width:360px;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+.box h2{margin-bottom:20px;text-align:center;color:#11C28C;font-size:22px}
+.input{width:100%;padding:14px;background:#000;border:1px solid #333;border-radius:12px;margin-bottom:12px;color:#fff;font-size:16px;outline:none}
+.btn{width:100%;padding:14px;background:#11C28C;color:#000;border:none;border-radius:12px;font-weight:bold;font-size:16px;cursor:pointer}
+.toggle{text-align:center;margin-top:15px;color:#888;font-size:14px;cursor:pointer}
+
+/* --- 头部 --- */
+.header{display:flex;padding:16px;gap:12px;align-items:center;position:sticky;top:0;background:#000;z-index:100}
+.logo{font-size:22px;font-weight:800;color:#11C28C;letter-spacing:1px}
+.search{flex:1;background:#1a1a1a;padding:10px 16px;border-radius:25px;color:#777;font-size:14px}
+#userInfo{color:#11C28C;font-weight:bold;font-size:14px;white-space:nowrap}
+
+/* --- 标签页 --- */
+.tabs{display:flex;gap:16px;padding:10px 16px;overflow-x:auto;background:#000;position:sticky;top:60px;z-index:99}
+.tab{color:#777;white-space:nowrap;cursor:pointer;font-size:15px;padding:5px 0}
+.tab.active{color:#11C28C;font-weight:bold}
+
+/* --- 宫格 --- */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;padding:20px;text-align:center;background:#000}
+.grid-icon{width:50px;height:50px;background:#1a1a1a;border-radius:14px;display:grid;place-items:center;font-size:24px;margin:0 auto 8px}
+.grid div{font-size:13px;color:#ccc}
+
+/* --- 页面内容 --- */
+.page{display:none;padding:16px;animation:fadeIn 0.3s}
 .page.active{display:block}
-.item{background:#111;border-radius:12px;margin-bottom:10px;position:relative;overflow:hidden}
-.item img,.item video{width:100%;display:block}
-.item .name{padding:10px}
-.del{position:absolute;top:10px;right:10px;background:#ff4444;color:#fff;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;z-index:10}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* --- 列表项 --- */
+.item{background:#111;border-radius:16px;margin-bottom:16px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.3);position:relative}
+.item img,.item video{width:100%;display:block;cursor:zoom-in;max-height:400px;object-fit:cover}
+.item .name{padding:12px 16px;font-size:15px;color:#eee;border-top:1px solid #222;background:#161616}
+
+/* --- 删除按钮 --- */
+.del{position:absolute;top:10px;right:10px;background:rgba(255,68,68,0.95);color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:22px;cursor:pointer;z-index:10;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,0.4)}
+
+/* --- 上传与提示 --- */
 #file{display:none}
-.upload-btn{background:#11C28C;color:#000;width:100%;padding:14px;border:none;border-radius:12px;margin-top:10px}
-#tip{margin:10px;padding:12px;border-radius:12px;text-align:center;font-weight:bold;display:none}
-.footer{position:fixed;bottom:0;left:0;right:0;height:60px;background:#0a0a0a;display:flex;justify-content:space-around;align-items:center}
-.footer-item{color:#777;font-size:12px;text-align:center;cursor:pointer}
+.upload-btn{background:#11C28C;color:#000;width:100%;padding:14px;border:none;border-radius:12px;margin-top:10px;font-weight:bold;font-size:16px}
+#tip{margin:10px;padding:12px;border-radius:12px;text-align:center;font-weight:bold;display:none;background:#11C28C;color:#000}
+
+/* --- 底部导航 --- */
+.footer{position:fixed;bottom:0;left:0;right:0;height:65px;background:#0a0a0a;display:flex;justify-content:space-around;align-items:center;border-top:1px solid #222;z-index:100}
+.footer-item{color:#777;font-size:11px;text-align:center;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+
+/* --- 全屏预览 --- */
+#lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:2000;justify-content:center;align-items:center}
+#lightbox img, #lightbox video{max-width:100%;max-height:100%;border-radius:8px}
+.close-lightbox{position:absolute;top:20px;right:20px;color:#fff;font-size:30px;cursor:pointer;z-index:2001}
 </style>
 </head>
 <body>
 
+<!-- 登录弹窗 -->
 <div class="modal" id="modal">
   <div class="box">
-    <h2 id="title">登录</h2>
-    <input class="input" id="user" placeholder="账号">
-    <input class="input" id="pwd" type="password" placeholder="密码">
-    <button class="btn" onclick="loginReg()">登录</button>
-    <div class="toggle" onclick="toggleMode()">没有账号？去注册</div>
+    <h2 id="title">登录清幽谷</h2>
+    <input class="input" id="user" placeholder="请输入账号">
+    <input class="input" id="pwd" type="password" placeholder="请输入密码">
+    <button class="btn" onclick="loginReg()">立即登录</button>
+    <div class="toggle" onclick="toggleMode()">还没有账号？去注册</div>
   </div>
 </div>
 
+<!-- 全屏预览灯箱 -->
+<div id="lightbox" onclick="closeLightbox()">
+    <span class="close-lightbox">×</span>
+    <div id="lightbox-content"></div>
+</div>
+
+<!-- 头部 -->
 <div class="header">
   <div class="logo">清幽谷</div>
-  <div class="search">搜索</div>
+  <div class="search">搜索资源...</div>
   <div id="userInfo"></div>
 </div>
 
+<!-- 分类 -->
 <div class="tabs">
   <div class="tab active" onclick="show('home')">首页</div>
   <div class="tab" onclick="show('recommend')">推荐</div>
-  <div class="tab" onclick="show('video')">视频</div>
-  <div class="tab" onclick="goUpload()">上传</div>
+  <div class="tab" onclick="show('video')">视频库</div>
+  <div class="tab" onclick="goUpload()">上传/添加</div>
   <div class="tab" onclick="goMy()">我的</div>
 </div>
 
+<!-- 宫格 -->
 <div class="grid">
   <div><div class="grid-icon">📱</div><div>APP</div></div>
   <div><div class="grid-icon">📖</div><div>小说</div></div>
@@ -77,17 +109,27 @@ body{background:#000;color:#fff;padding-bottom:70px}
 
 <div id="tip"></div>
 
-<div id="home" class="page active"></div>
-<div id="recommend" class="page"></div>
-<div id="video" class="page"></div>
+<!-- 页面 -->
+<div id="home" class="page active">
+    <div style="padding:40px 20px;text-align:center;color:#666">
+        <h3 style="color:#fff;margin-bottom:10px">欢迎来到清幽谷</h3>
+        <p>点击底部“上传/添加”发布你的资源</p>
+    </div>
+</div>
 
 <div id="upload" class="page">
-  <div style="background:#111;padding:20px;border-radius:12px">
-    <h3 style="margin-bottom:10px">添加云端资源</h3>
-    <p style="color:#888;font-size:12px;margin-bottom:10px">请输入视频/图片的网络直链</p>
-    <input class="input" id="linkUrl" placeholder="粘贴链接 (如B站/优酷/图片地址)">
-    <input class="input" id="linkName" placeholder="资源标题">
-    <button class="upload-btn" onclick="addCloudLink()">保存到云端</button>
+  <div style="background:#111;padding:20px;border-radius:16px">
+      <h3 style="margin-bottom:15px;color:#11C28C">添加资源</h3>
+      <input class="input" id="linkUrl" placeholder="粘贴视频/图片链接">
+      <input class="input" id="linkName" placeholder="资源标题">
+      <button class="upload-btn" onclick="addByLink()">添加链接</button>
+  </div>
+  <div style="background:#111;padding:20px;border-radius:16px;margin-top:20px">
+      <h3 style="margin-bottom:15px;color:#11C28C">上传本地文件</h3>
+      <p style="color:#666;font-size:12px;margin-bottom:10px">*注意：本地存储有限，建议小文件</p>
+      <input type="file" id="file" accept="image/*,video/*" multiple>
+      <button type="button" class="upload-btn" onclick="selectFile()">选择文件</button>
+      <button type="button" class="upload-btn" onclick="uploadLocal()">上传</button>
   </div>
 </div>
 
@@ -95,29 +137,24 @@ body{background:#000;color:#fff;padding-bottom:70px}
   <div id="myList"></div>
 </div>
 
+<!-- 底部导航 -->
 <div class="footer">
-  <div class="footer-item" onclick="show('home')">🏠 首页</div>
-  <div class="footer-item" onclick="show('msg')">💬 消息</div>
-  <div class="footer-item" onclick="goUpload()">📤 上传</div>
-  <div class="footer-item" onclick="show('find')">🔍 发现</div>
-  <div class="footer-item" onclick="goMy()">👤 我的</div>
+  <div class="footer-item" onclick="show('home')"><span>🏠</span>首页</div>
+  <div class="footer-item" onclick="show('msg')"><span>💬</span>消息</div>
+  <div class="footer-item" onclick="goUpload()"><span>📤</span>上传</div>
+  <div class="footer-item" onclick="show('find')"><span>🔍</span>发现</div>
+  <div class="footer-item" onclick="goMy()"><span>👤</span>我的</div>
 </div>
 
 <script>
-// ==========================================
-// ⬇️⬇️⬇️ 在这里填入你的 Supabase 配置 ⬇️⬇️⬇️
-const SUPABASE_URL = '你的SUPABASE_PROJECT_URL'; 
-const SUPABASE_KEY = '你的SUPABASE_ANON_KEY';
-// ==========================================
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 let isReg = false
+let files = []
 
+// --- 用户系统 ---
 function toggleMode(){
   isReg = !isReg
-  title.innerText = isReg ? '注册' : '登录'
-  document.querySelector('.toggle').innerText = isReg ? '已有账号？去登录' : '没有账号？去注册'
+  title.innerText = isReg ? '注册账号' : '登录清幽谷'
+  document.querySelector('.toggle').innerText = isReg ? '已有账号？去登录' : '还没有账号？去注册'
 }
 
 function openModal(){ modal.style.display = 'flex' }
@@ -127,15 +164,16 @@ function loginReg(){
   let p = pwd.value.trim()
   if(!u || !p){ alert('请输入账号密码'); return }
 
-  // 这里为了简单，依然用本地存一下登录状态，但数据会传到云端
+  let users = JSON.parse(localStorage.getItem('users') || '{}')
+
   if(isReg){
-    localStorage.setItem('users_' + u, p);
-    alert('注册成功，请登录');
-    toggleMode();
+    if(users[u]){ alert('账号已存在'); return }
+    users[u] = p
+    localStorage.setItem('users', JSON.stringify(users))
+    alert('注册成功，请登录')
+    toggleMode()
   }else{
-    let savedP = localStorage.getItem('users_' + u);
-    if(!savedP || savedP !== p){ alert('账号或密码错误'); return }
-    
+    if(!users[u] || users[u] !== p){ alert('账号或密码错误'); return }
     localStorage.setItem('loginUser', u)
     modal.style.display = 'none'
     updateUser()
@@ -146,8 +184,8 @@ function loginReg(){
 function updateUser(){
   let u = localStorage.getItem('loginUser')
   userInfo.innerHTML = u
-    ? `${u} <span onclick="logout()" style="color:#ff4444;cursor:pointer">登出</span>`
-    : '<span onclick="openModal()" style="cursor:pointer">登录/注册</span>'
+    ? `${u} <span onclick="logout()" style="color:#ff4444;margin-left:5px">退出</span>`
+    : '<span onclick="openModal()" style="cursor:pointer">登录</span>'
 }
 
 function logout(){
@@ -165,114 +203,146 @@ function checkLogin(){
   return true
 }
 
+// --- 页面切换 ---
 function show(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
   document.getElementById(id).classList.add('active')
   tip.style.display = 'none'
-  if(id === 'my') loadMy(); // 进入我的页面时刷新数据
 }
 
 function goUpload(){ if(checkLogin()) show('upload') }
-function goMy(){ if(checkLogin()) show('my') }
+function goMy(){ if(checkLogin()){ show('my'); loadMy() } }
 
-// --- 核心：保存到云端 ---
-async function addCloudLink(){
-  if(!checkLogin()) return
-  let url = linkUrl.value.trim()
-  let name = linkName.value.trim()
-  let currentUser = localStorage.getItem('loginUser')
-
-  if(!url || !name){ alert('请填写标题和链接'); return }
-
-  tip.style.display = 'block'
-  tip.innerText = '正在上传到云端...'
-
-  // 判断图片还是视频
-  let isImg = url.match(/\.(jpeg|jpg|gif|png)$/) != null
-
-  // 调用 Supabase 插入数据
-  const { data, error } = await supabase
-    .from('files')
-    .insert([
-      { name: name, url: url, user_id: currentUser, is_img: isImg }
-    ])
-
-  if (error) {
-    alert('上传失败: ' + error.message)
-    tip.innerText = '上传失败'
-  } else {
-    alert('上传成功！所有人都能看到了')
+// --- 功能：添加链接 ---
+function addByLink(){
+    if(!checkLogin()) return
+    let url = linkUrl.value.trim()
+    let name = linkName.value.trim()
+    
+    if(!url || !name){ alert('请填写标题和链接'); return }
+    
+    let user = localStorage.getItem('loginUser')
+    let list = JSON.parse(localStorage.getItem('files_'+user) || '[]')
+    
+    let isImg = url.match(/\.(jpeg|jpg|gif|png|webp)$/) != null
+    
+    list.unshift({ url: url, name: name, isImg: isImg, isLink: true })
+    
+    localStorage.setItem('files_'+user, JSON.stringify(list))
+    alert('添加成功！')
     linkUrl.value = ''
     linkName.value = ''
     show('my')
+    loadMy()
+}
+
+// --- 功能：本地上传 ---
+function selectFile(){
+  file.click()
+  file.onchange = (e)=>{
+    files = Array.from(e.target.files)
+    tip.style.display='block'
+    tip.innerText='已选择 '+files.length+' 个文件'
   }
 }
 
-// --- 核心：从云端读取 ---
-async function loadMy(){
-  let currentUser = localStorage.getItem('loginUser')
-  if(!currentUser) return
+async function uploadLocal(){
+  if(!checkLogin()) return
+  if(files.length === 0){ alert('请选择文件'); return }
 
-  tip.style.display = 'block'
-  tip.innerText = '正在从云端加载...'
+  let user = localStorage.getItem('loginUser')
+  let list = JSON.parse(localStorage.getItem('files_'+user) || '[]')
 
-  // 查询数据库
-  const { data, error } = await supabase
-    .from('files')
-    .select('*')
-    .eq('user_id', currentUser)
-    .order('id', { ascending: false })
-
-  if (error) {
-    alert('加载失败')
-  } else {
-    let html = ''
-    // 增加一个清空按钮
-    html += `<button class="upload-btn" style="background:#ff4444;margin-bottom:15px" onclick="clearAll()">清空所有</button>`
-    
-    data.forEach(item => {
-      html += `
-        <div class="item">
-          <button type="button" class="del" onclick="del(${item.id})">×</button>
-          ${item.is_img 
-            ? `<img src="${item.url}">` 
-            : `<video controls src="${item.url}"></video>`}
-          <div class="name">${item.name}</div>
-        </div>
-      `
-    })
-    
-    myList.innerHTML = html
-    tip.style.display = 'none'
+  for(let f of files){
+    try{
+        let url = await readAsBase64(f)
+        list.unshift({ url, name:f.name, isImg:f.type.startsWith('image/'), isLink: false })
+    }catch(e){
+        alert('文件太大，无法存入本地，请使用"添加链接"功能')
+        return
+    }
   }
+
+  localStorage.setItem('files_'+user, JSON.stringify(list))
+  tip.innerText='上传成功'
+  setTimeout(()=>{ show('my'); loadMy() },1000)
+  files = []
+}
+
+// --- 功能：渲染列表 ---
+function loadMy(){
+  let user = localStorage.getItem('loginUser')
+  let arr = JSON.parse(localStorage.getItem('files_'+user) || '[]')
+  
+  let clearBtn = `<button class="upload-btn" style="background:#ff4444;margin-bottom:15px" onclick="clearAll()">🗑️ 清空所有资源</button>`;
+  
+  if(arr.length === 0){
+      myList.innerHTML = clearBtn + '<div style="text-align:center;color:#555;margin-top:40px">暂无资源</div>'
+      return
+  }
+
+  let listHtml = arr.map((item,idx)=>`
+    <div class="item">
+      <button type="button" class="del" onclick="del(${idx})">×</button>
+      ${item.isImg 
+        ? `<img src="${item.url}" onclick="openLightbox('${item.url}', 'img')">` 
+        : `<video controls src="${item.url}" onclick="toggleVideo(this)"></video>`}
+      <div class="name">${item.name}</div>
+    </div>
+  `).join('')
+
+  myList.innerHTML = clearBtn + listHtml
 }
 
 // --- 删除 ---
-async function del(id){
+function del(idx){
   if(!confirm('确定删除？')) return
-  
-  const { error } = await supabase
-    .from('files')
-    .delete()
-    .eq('id', id)
+  let user = localStorage.getItem('loginUser')
+  let arr = JSON.parse(localStorage.getItem('files_'+user) || '[]')
+  arr.splice(idx,1)
+  localStorage.setItem('files_'+user, JSON.stringify(arr))
+  loadMy()
+}
 
-  if(!error){
+function clearAll(){
+    if(!confirm('⚠️ 确定清空所有？')) return
+    let user = localStorage.getItem('loginUser')
+    localStorage.removeItem('files_'+user)
     loadMy()
-  }
 }
 
-async function clearAll(){
-    if(!confirm('确定清空所有资源？')) return
-    let currentUser = localStorage.getItem('loginUser')
-    
-    const { error } = await supabase
-        .from('files')
-        .delete()
-        .eq('user_id', currentUser)
-        
-    if(!error) loadMy()
+// --- 预览 ---
+function toggleVideo(video){
+    if(video.paused){ video.play() }else{ video.pause() }
 }
 
+function openLightbox(src, type){
+    const lb = document.getElementById('lightbox')
+    const content = document.getElementById('lightbox-content')
+    if(type === 'img'){
+        content.innerHTML = `<img src="${src}">`
+    }else{
+        content.innerHTML = `<video controls src="${src}" style="max-width:100%"></video>`
+    }
+    lb.style.display = 'flex'
+}
+
+function closeLightbox(){
+    document.getElementById('lightbox').style.display = 'none'
+    const video = document.querySelector('#lightbox video')
+    if(video) video.pause()
+}
+
+function readAsBase64(file){
+  return new Promise(res=>{
+    let r = new FileReader()
+    r.onload = e=>res(e.target.result)
+    r.readAsDataURL(file)
+  })
+}
+
+// 初始化
+window.onload = updateUser
 </script>
 </body>
 </html>
