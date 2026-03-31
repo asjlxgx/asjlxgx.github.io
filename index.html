@@ -3,22 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>我的媒体库（永久保存）</title>
+<title>我的媒体库（永久保存·可查看）</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 body{background:#f0f2f5;padding:20px}
-.container{max-width:800px;margin:40px auto;background:#fff;border-radius:16px;overflow:hidden}
-.header{background:#2563eb;color:white;padding:24px}
+.container{max-width:800px;margin:40px auto;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 5px 20px rgba(0,0,0,0.05)}
+.header{background:#2563eb;color:white;padding:28px 30px}
+.header h1{font-size:26px}
 .main{padding:30px}
-.upload-box{border:2px dashed #cbd5e1;padding:40px 20px;text-align:center;border-radius:12px;background:#fafbfb;cursor:pointer}
-.upload-box:hover{border-color:#2563eb}
+.upload-box{border:2px dashed #cbd5e1;padding:50px 20px;text-align:center;border-radius:16px;background:#fafbfb;cursor:pointer;transition:all 0.3s}
+.upload-box:hover{border-color:#2563eb;background:#f7faff}
 #file{display:none}
-.btn{background:#2563eb;color:white;border:none;padding:14px;width:100%;border-radius:12px;margin-top:20px;font-size:16px}
-video,img{width:100%;border-radius:12px;margin-top:20px}
-.status{margin-top:15px;font-size:14px;color:#333;padding:10px;background:#e6f7ff;border-radius:8px}
-.list{margin-top:30px}
-.item{padding:12px;background:#f8f9fa;border-radius:10px;margin-bottom:10px}
-.item a{color:#2563eb;text-decoration:none}
+.btn{background:#2563eb;color:white;border:none;padding:16px;border-radius:12px;width:100%;margin-top:24px;font-size:16px;font-weight:500;cursor:pointer;transition:background 0.3s}
+.btn:hover{background:#1d4ed8}
+.status{margin-top:16px;font-size:15px;color:#1f2937;padding:12px 16px;background:#e6f7ff;border-radius:10px}
+.preview-area{margin-top:24px}
+video,img{width:100%;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+.media-list{margin-top:40px}
+.media-list h3{font-size:18px;color:#1f2937;margin-bottom:16px}
+.media-item{padding:14px 16px;background:#f8f9fa;border-radius:12px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.media-item .name{flex:1;color:#1f2937;font-weight:500;word-break:break-all}
+.media-item .view-btn{background:#2563eb;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px}
+.media-item .del-btn{background:#ef4444;color:white;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px}
 </style>
 </head>
 <body>
@@ -31,90 +37,121 @@ video,img{width:100%;border-radius:12px;margin-top:20px}
 
     <div class="upload-box" onclick="document.getElementById('file').click()">
       <h3>点击选择图片/视频</h3>
-      <p>上传后刷新不丢失</p>
+      <p>上传后永久保存，刷新不丢失，点击可查看</p>
     </div>
 
     <input type="file" id="file" accept="video/*,image/*">
     <button class="btn" onclick="upload()">上传并保存</button>
 
-    <div id="status"></div>
-    <img id="img" style="display:none">
-    <video id="video" controls style="display:none"></video>
+    <div class="status" id="status"></div>
+    <div class="preview-area" id="previewArea" style="display:none"></div>
 
-    <div class="list" id="list"></div>
+    <div class="media-list">
+      <h3>已保存媒体</h3>
+      <div id="mediaList"></div>
+    </div>
+
   </div>
 </div>
 
 <script>
 const fileInput = document.getElementById('file');
-const img = document.getElementById('img');
-const video = document.getElementById('video');
 const status = document.getElementById('status');
-const list = document.getElementById('list');
+const previewArea = document.getElementById('previewArea');
+const mediaList = document.getElementById('mediaList');
 let currentFile;
 
 // 选择文件
 fileInput.onchange = (e) => {
   currentFile = e.target.files[0];
-  status.textContent = "✅ 已选择：" + currentFile.name;
+  status.textContent = `✅ 已选择：${currentFile.name}`;
 };
 
-// 上传并保存到本地存储（永久）
+// 上传并转为Base64永久存储
 function upload() {
   if (!currentFile) {
-    alert("请先选择文件！");
+    alert("请先选择图片或视频！");
     return;
   }
 
-  const url = URL.createObjectURL(currentFile);
-  const isImage = currentFile.type.startsWith('image/');
-  const isVideo = currentFile.type.startsWith('video/');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64 = e.target.result;
+    const isImage = currentFile.type.startsWith('image/');
+    const isVideo = currentFile.type.startsWith('video/');
 
-  // 显示预览
-  img.style.display = 'none';
-  video.style.display = 'none';
+    // 显示预览
+    previewArea.style.display = 'block';
+    previewArea.innerHTML = isImage 
+      ? `<img src="${base64}" alt="预览图">` 
+      : `<video controls src="${base64}"></video>`;
 
-  if (isImage) {
-    img.src = url;
-    img.style.display = 'block';
-  }
-  if (isVideo) {
-    video.src = url;
-    video.style.display = 'block';
-  }
+    status.textContent = `✅ 上传并永久保存成功：${currentFile.name}`;
 
-  status.textContent = "✅ 上传并保存成功：" + currentFile.name;
+    // 保存到本地存储
+    const history = JSON.parse(localStorage.getItem('mediaList') || '[]');
+    history.push({
+      name: currentFile.name,
+      data: base64,
+      type: isImage ? 'image' : 'video'
+    });
+    localStorage.setItem('mediaList', JSON.stringify(history));
 
-  // 保存到本地存储（永久）
-  const history = JSON.parse(localStorage.getItem('media') || '[]');
-  history.push({
-    name: currentFile.name,
-    url: url,
-    type: isImage ? 'image' : 'video'
-  });
-  localStorage.setItem('media', JSON.stringify(history));
+    renderList();
+  };
 
-  renderList();
+  // 读取文件为Base64
+  reader.readAsDataURL(currentFile);
 }
 
-// 渲染列表（刷新不丢）
+// 渲染媒体列表
 function renderList() {
-  const history = JSON.parse(localStorage.getItem('media') || '[]');
-  list.innerHTML = '';
-  history.forEach(item => {
+  const history = JSON.parse(localStorage.getItem('mediaList') || '[]');
+  mediaList.innerHTML = '';
+
+  history.forEach((item, index) => {
     const div = document.createElement('div');
-    div.className = 'item';
-    const a = document.createElement('a');
-    a.href = item.url;
-    a.target = '_blank';
-    a.textContent = item.name;
-    div.appendChild(a);
-    list.appendChild(div);
+    div.className = 'media-item';
+    
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'name';
+    nameSpan.textContent = item.name;
+
+    const viewBtn = document.createElement('button');
+    viewBtn.className = 'view-btn';
+    viewBtn.textContent = '查看';
+    viewBtn.onclick = () => {
+      previewArea.style.display = 'block';
+      previewArea.innerHTML = item.type === 'image' 
+        ? `<img src="${item.data}" alt="${item.name}">` 
+        : `<video controls src="${item.data}"></video>`;
+      window.scrollTo({ top: previewArea.offsetTop - 20, behavior: 'smooth' });
+    };
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'del-btn';
+    delBtn.textContent = '删除';
+    delBtn.onclick = () => {
+      if(confirm(`确定要删除 ${item.name} 吗？`)) {
+        history.splice(index, 1);
+        localStorage.setItem('mediaList', JSON.stringify(history));
+        renderList();
+        previewArea.style.display = 'none';
+      }
+    };
+
+    div.appendChild(nameSpan);
+    div.appendChild(viewBtn);
+    div.appendChild(delBtn);
+    mediaList.appendChild(div);
   });
 }
 
-// 页面加载时自动显示
-window.onload = renderList;
+// 页面加载时恢复列表
+window.onload = () => {
+  renderList();
+  status.textContent = "📁 媒体库已加载";
+};
 </script>
 </body>
 </html>
