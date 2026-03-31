@@ -2,56 +2,110 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>清幽谷</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>清幽谷 - 优化版</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
-body{background:#000;color:#fff;padding-bottom:70px}
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
+body{background:#000;color:#fff;padding-bottom:80px;-webkit-tap-highlight-color:transparent}
 
-.header{display:flex;padding:16px;gap:10px;align-items:center}
-.logo{font-size:20px;font-weight:bold}
-.search{flex:1;background:#1a1a1a;padding:10px 14px;border-radius:30px}
-.login{background:#11C28C;color:#000;padding:10px 16px;border-radius:10px;border:none;font-weight:bold}
+/* --- 弹窗通用样式 --- */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:999;display:none;backdrop-filter:blur(5px)}
+.box{background:#1a1a1a;padding:30px;border-radius:20px;width:85%;max-width:360px;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+.box h2{margin-bottom:20px;text-align:center;color:#11C28C;font-size:22px}
+.input{width:100%;padding:14px;background:#000;border:1px solid #333;border-radius:12px;margin-bottom:12px;color:#fff;font-size:16px}
+.btn{width:100%;padding:14px;background:#11C28C;color:#000;border:none;border-radius:12px;font-weight:bold;font-size:16px;cursor:pointer}
+.toggle{text-align:center;margin-top:15px;color:#888;font-size:14px;cursor:pointer}
 
-.tabs{display:flex;gap:16px;padding:10px 16px;overflow-x:auto}
-.tab{color:#777;font-size:16px;white-space:nowrap}
-.tab.active{color:#11C28C}
+/* --- 头部与导航 --- */
+.header{display:flex;padding:16px;gap:12px;align-items:center;position:sticky;top:0;background:#000;z-index:100}
+.logo{font-size:22px;font-weight:800;color:#11C28C;letter-spacing:1px}
+.search{flex:1;background:#1a1a1a;padding:10px 16px;border-radius:25px;color:#777;font-size:14px}
+#userInfo{color:#11C28C;font-weight:bold;font-size:14px;white-space:nowrap}
 
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:20px 16px;text-align:center}
-.grid-icon{width:50px;height:50px;background:#1a1a1a;border-radius:14px;margin:0 auto 6px;display:grid;place-items:center;font-size:24px}
+.tabs{display:flex;gap:16px;padding:10px 16px;overflow-x:auto;background:#000;position:sticky;top:60px;z-index:99}
+.tab{color:#777;white-space:nowrap;cursor:pointer;font-size:15px;padding:5px 0}
+.tab.active{color:#11C28C;font-weight:bold}
 
-.page{display:none;padding:16px}
+/* --- 宫格菜单 --- */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;padding:20px;text-align:center;background:#000}
+.grid-icon{width:50px;height:50px;background:#1a1a1a;border-radius:14px;display:grid;place-items:center;font-size:24px;margin:0 auto 8px}
+.grid div{font-size:13px;color:#ccc}
+
+/* --- 内容列表 --- */
+.page{display:none;padding:16px;animation:fadeIn 0.3s}
 .page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-.item{background:#111;border-radius:12px;margin-bottom:10px}
-.item img,.item video{width:100%;display:block}
-.item .name{padding:10px}
+.item{background:#111;border-radius:16px;margin-bottom:16px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.3)}
+/* 媒体样式优化 */
+.item img,.item video{width:100%;display:block;cursor:zoom-in;max-height:400px;object-fit:cover}
+.item .name{padding:12px 16px;font-size:15px;color:#eee;border-top:1px solid #222;background:#161616}
 
+/* --- 删除按钮修复 --- */
+.del{
+  position:absolute;top:10px;right:10px;background:rgba(255,68,68,0.9);
+  color:#fff;border:none;border-radius:50%;width:34px;height:34px;
+  font-size:20px;cursor:pointer;z-index:10;display:grid;place-items:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.4);transition:transform 0.2s
+}
+.del:active{transform:scale(0.9)}
+
+/* --- 上传按钮 --- */
 #file{display:none}
-.btn{background:#11C28C;color:#000;width:100%;padding:14px;border:none;border-radius:12px;margin-top:10px}
+.upload-btn{background:#11C28C;color:#000;width:100%;padding:14px;border:none;border-radius:12px;margin-top:10px;font-weight:bold;font-size:16px}
 
-#tip{margin:10px;padding:12px;border-radius:12px;text-align:center;font-weight:bold;display:none}
+#tip{margin:10px;padding:12px;border-radius:12px;text-align:center;font-weight:bold;display:none;background:#11C28C;color:#000}
 
-.footer{position:fixed;bottom:0;left:0;right:0;height:60px;background:#0a0a0a;display:flex;justify-content:space-around;align-items:center}
-.footer-item{color:#777;font-size:12px;text-align:center}
+/* --- 底部导航 --- */
+.footer{position:fixed;bottom:0;left:0;right:0;height:65px;background:#0a0a0a;display:flex;justify-content:space-around;align-items:center;border-top:1px solid #222;z-index:100}
+.footer-item{color:#777;font-size:11px;text-align:center;cursor:pointer;display:flex;flex-direction:column;gap:4px}
+.footer-item.active{color:#11C28C}
+
+/* --- 全屏预览灯箱 --- */
+#lightbox{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);
+  z-index:2000;justify-content:center;align-items:center;
+}
+#lightbox img, #lightbox video{max-width:100%;max-height:100%;border-radius:8px}
+.close-lightbox{position:absolute;top:20px;right:20px;color:#fff;font-size:30px;cursor:pointer;z-index:2001}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="logo">清幽谷</div>
-  <div class="search">搜索</div>
-  <button class="login">登录</button>
+<!-- 登录注册弹窗 -->
+<div class="modal" id="modal">
+  <div class="box">
+    <h2 id="title">登录清幽谷</h2>
+    <input class="input" id="user" placeholder="请输入账号">
+    <input class="input" id="pwd" type="password" placeholder="请输入密码">
+    <button class="btn" onclick="loginReg()">立即登录</button>
+    <div class="toggle" onclick="toggleMode()">还没有账号？去注册</div>
+  </div>
 </div>
 
+<!-- 全屏预览 -->
+<div id="lightbox" onclick="closeLightbox()">
+    <span class="close-lightbox">×</span>
+    <div id="lightbox-content"></div>
+</div>
+
+<!-- 头部 -->
+<div class="header">
+  <div class="logo">清幽谷</div>
+  <div class="search">搜索资源...</div>
+  <div id="userInfo"></div>
+</div>
+
+<!-- 分类 -->
 <div class="tabs">
   <div class="tab active" onclick="show('home')">首页</div>
   <div class="tab" onclick="show('recommend')">推荐</div>
-  <div class="tab" onclick="show('video')">视频</div>
-  <div class="tab" onclick="show('upload')">上传</div>
-  <div class="tab" onclick="show('my')">我的</div>
+  <div class="tab" onclick="show('video')">视频库</div>
+  <div class="tab" onclick="goUpload()">上传/添加</div>
+  <div class="tab" onclick="goMy()">我的</div>
 </div>
 
+<!-- 宫格 -->
 <div class="grid">
   <div><div class="grid-icon">📱</div><div>APP</div></div>
   <div><div class="grid-icon">📖</div><div>小说</div></div>
@@ -65,98 +119,262 @@ body{background:#000;color:#fff;padding-bottom:70px}
 
 <div id="tip"></div>
 
-<div id="home" class="page active"></div>
-<div id="recommend" class="page"></div>
-<div id="video" class="page"></div>
-
-<div id="upload" class="page">
-  <input type="file" id="file" accept="image/*,video/*" multiple>
-  <button class="btn" onclick="selectFile()">选择文件（可多选）</button>
-  <button class="btn" onclick="upload()">上传</button>
+<!-- 页面内容 -->
+<div id="home" class="page active">
+    <div style="padding:40px 20px;text-align:center;color:#666">
+        <h3 style="color:#fff;margin-bottom:10px">欢迎来到清幽谷</h3>
+        <p>点击底部“上传/添加”发布你的资源</p>
+    </div>
 </div>
 
+<!-- 上传页面 -->
+<div id="upload" class="page">
+  <div style="background:#111;padding:20px;border-radius:16px">
+      <h3 style="margin-bottom:15px;color:#11C28C">方式一：添加外部链接</h3>
+      <input class="input" id="linkUrl" placeholder="粘贴视频/图片直链">
+      <input class="input" id="linkName" placeholder="资源标题">
+      <button class="upload-btn" onclick="addByLink()">添加链接</button>
+  </div>
+  
+  <div style="background:#111;padding:20px;border-radius:16px;margin-top:20px">
+      <h3 style="margin-bottom:15px;color:#11C28C">方式二：上传本地文件</h3>
+      <p style="color:#666;font-size:12px;margin-bottom:10px">*注意：本地存储有限，建议上传小文件或图片</p>
+      <input type="file" id="file" accept="image/*,video/*" multiple>
+      <button type="button" class="upload-btn" onclick="selectFile()">选择手机文件</button>
+      <button type="button" class="upload-btn" onclick="uploadLocal()">上传(仅自己可见)</button>
+  </div>
+</div>
+
+<!-- 我的页面 -->
 <div id="my" class="page">
   <div id="myList"></div>
 </div>
 
+<!-- 底部导航 -->
 <div class="footer">
-  <div class="footer-item" onclick="show('home')">🏠 首页</div>
-  <div class="footer-item" onclick="show('msg')">💬 消息</div>
-  <div class="footer-item" onclick="show('upload')">📤 上传</div>
-  <div class="footer-item" onclick="show('find')">🔍 发现</div>
-  <div class="footer-item" onclick="show('my')">👤 我的</div>
+  <div class="footer-item" onclick="show('home')"><span>🏠</span>首页</div>
+  <div class="footer-item" onclick="show('msg')"><span>💬</span>消息</div>
+  <div class="footer-item" onclick="goUpload()"><span>📤</span>上传</div>
+  <div class="footer-item" onclick="show('find')"><span>🔍</span>发现</div>
+  <div class="footer-item" onclick="goMy()"><span>👤</span>我的</div>
 </div>
 
 <script>
-let files = [];
-const tip = document.getElementById('tip');
+let isReg = false
+let files = []
 
-function show(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  tip.style.display = 'none';
+// --- 用户系统 ---
+function toggleMode(){
+  isReg = !isReg
+  title.innerText = isReg ? '注册账号' : '登录清幽谷'
+  document.querySelector('.toggle').innerText = isReg ? '已有账号？去登录' : '还没有账号？去注册'
 }
 
-function selectFile() {
-  document.getElementById('file').click();
-  document.getElementById('file').onchange = e => {
-    files = Array.from(e.target.files);
-    tip.style.display = 'block';
-    tip.style.background = '#11C28C';
-    tip.innerText = '✅ 已选择 ' + files.length + ' 个文件';
+function openModal(){ modal.style.display = 'flex' }
+
+function loginReg(){
+  let u = user.value.trim()
+  let p = pwd.value.trim()
+  if(!u || !p){ alert('请输入账号密码'); return }
+
+  let users = JSON.parse(localStorage.getItem('users') || '{}')
+
+  if(isReg){
+    if(users[u]){ alert('账号已存在'); return }
+    users[u] = p
+    localStorage.setItem('users', JSON.stringify(users))
+    alert('注册成功，请登录')
+    toggleMode()
+  }else{
+    if(!users[u] || users[u] !== p){ alert('账号或密码错误'); return }
+    localStorage.setItem('loginUser', u)
+    modal.style.display = 'none'
+    updateUser()
+    show('home')
   }
 }
 
-async function upload() {
-  if (files.length === 0) {
-    tip.style.display = 'block';
-    tip.style.background = '#ff4444';
-    tip.innerText = '❌ 请选择文件';
-    return;
+function updateUser(){
+  let u = localStorage.getItem('loginUser')
+  userInfo.innerHTML = u
+    ? `${u} <span onclick="logout()" style="color:#ff4444;margin-left:5px">退出</span>`
+    : '<span onclick="openModal()" style="cursor:pointer">登录</span>'
+}
+
+function logout(){
+  localStorage.removeItem('loginUser')
+  updateUser()
+  show('home')
+}
+
+function checkLogin(){
+  if(!localStorage.getItem('loginUser')){
+    alert('请先登录')
+    openModal()
+    return false
   }
+  return true
+}
 
-  tip.style.display = 'block';
-  tip.style.background = '#11C28C';
-  tip.innerText = '⏳ 上传中...';
+// --- 页面切换 ---
+function show(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
+  document.getElementById(id).classList.add('active')
+  tip.style.display = 'none'
+  
+  // 更新底部导航状态
+  document.querySelectorAll('.footer-item').forEach((item, index) => {
+      item.classList.remove('active')
+      // 简单匹配逻辑，实际开发可用更严谨的方式
+      if((id==='home' && index===0) || (id==='my' && index===4) || (id==='upload' && index===2)) {
+          item.classList.add('active')
+      }
+  })
+}
 
-  let list = JSON.parse(localStorage.getItem('myList') || '[]');
+function goUpload(){ if(checkLogin()) show('upload') }
+function goMy(){ if(checkLogin()){ show('my'); loadMy() } }
 
-  for (let file of files) {
-    const url = await readFile(file);
+// --- 核心功能：添加链接 ---
+function addByLink(){
+    if(!checkLogin()) return
+    let url = linkUrl.value.trim()
+    let name = linkName.value.trim()
+    
+    if(!url || !name){ alert('请填写标题和链接'); return }
+    
+    let user = localStorage.getItem('loginUser')
+    let list = JSON.parse(localStorage.getItem('files_'+user) || '[]')
+    
+    // 简单的图片后缀判断
+    let isImg = url.match(/\.(jpeg|jpg|gif|png|webp)$/) != null
+    
     list.unshift({
-      url,
-      name: file.name,
-      isImg: file.type.startsWith('image/')
-    });
+      url: url, 
+      name: name, 
+      isImg: isImg,
+      isLink: true
+    })
+    
+    localStorage.setItem('files_'+user, JSON.stringify(list))
+    alert('添加成功！')
+    linkUrl.value = ''
+    linkName.value = ''
+    show('my')
+    loadMy()
+}
+
+// --- 核心功能：本地上传 ---
+function selectFile(){
+  file.click()
+  file.onchange = (e)=>{
+    files = Array.from(e.target.files)
+    tip.style.display='block'
+    tip.innerText='已选择 '+files.length+' 个文件'
+  }
+}
+
+async function uploadLocal(){
+  if(!checkLogin()) return
+  if(files.length === 0){ alert('请选择文件'); return }
+
+  let user = localStorage.getItem('loginUser')
+  let list = JSON.parse(localStorage.getItem('files_'+user) || '[]')
+
+  if(files.length > 3){ alert('文件较多，建议分次上传，以免浏览器崩溃'); }
+
+  for(let f of files){
+    try{
+        let url = await readAsBase64(f)
+        list.unshift({
+          url, name:f.name, isImg:f.type.startsWith('image/'), isLink: false
+        })
+    }catch(e){
+        alert('文件太大，无法存入本地存储，请使用"添加链接"功能')
+        return
+    }
   }
 
-  localStorage.setItem('myList', JSON.stringify(list));
-
-  tip.innerText = '✅ 全部上传成功！';
-  setTimeout(() => show('my'), 1000);
-  loadMyList();
-  files = [];
+  localStorage.setItem('files_'+user, JSON.stringify(list))
+  tip.innerText='上传成功'
+  setTimeout(()=>{ show('my'); loadMy() },1000)
+  files = []
 }
 
-function readFile(file) {
-  return new Promise(resolve => {
-    const reader = new FileReader();
-    reader.onload = e => resolve(e.target.result);
-    reader.readAsDataURL(file);
-  });
-}
+// --- 核心功能：渲染列表与预览 ---
+function loadMy(){
+  let user = localStorage.getItem('loginUser')
+  let arr = JSON.parse(localStorage.getItem('files_'+user) || '[]')
+  
+  if(arr.length === 0){
+      myList.innerHTML = '<div style="text-align:center;color:#555;margin-top:40px">暂无资源 快去上传吧</div>'
+      return
+  }
 
-function loadMyList() {
-  const arr = JSON.parse(localStorage.getItem('myList') || '[]');
-  document.getElementById('myList').innerHTML = arr.map(item => `
+  myList.innerHTML = arr.map((item,idx)=>`
     <div class="item">
-      ${item.isImg ? `<img src="${item.url}">` : `<video controls src="${item.url}"></video>`}
+      <!-- 修复删除按钮：添加 type="button" -->
+      <button type="button" class="del" onclick="del(${idx})">×</button>
+      
+      ${item.isImg 
+        ? `<img src="${item.url}" onclick="openLightbox('${item.url}', 'img')">` 
+        : `<video controls src="${item.url}" onclick="toggleVideo(this)"></video>`}
+        
       <div class="name">${item.name}</div>
     </div>
-  `).join('');
+  `).join('')
 }
 
-window.onload = loadMyList;
+// 修复删除功能
+function del(idx){
+  if(!confirm('确定删除这个资源吗？')) return
+  let user = localStorage.getItem('loginUser')
+  let arr = JSON.parse(localStorage.getItem('files_'+user) || '[]')
+  arr.splice(idx,1)
+  localStorage.setItem('files_'+user, JSON.stringify(arr))
+  loadMy()
+}
+
+// 视频点击播放/暂停
+function toggleVideo(video){
+    if(video.paused){
+        video.play()
+    }else{
+        video.pause()
+    }
+}
+
+// 图片全屏预览
+function openLightbox(src, type){
+    const lb = document.getElementById('lightbox')
+    const content = document.getElementById('lightbox-content')
+    
+    if(type === 'img'){
+        content.innerHTML = `<img src="${src}">`
+    }else{
+        content.innerHTML = `<video controls src="${src}" style="max-width:100%"></video>`
+    }
+    
+    lb.style.display = 'flex'
+}
+
+function closeLightbox(){
+    document.getElementById('lightbox').style.display = 'none'
+    // 关闭时停止视频
+    const video = document.querySelector('#lightbox video')
+    if(video) video.pause()
+}
+
+function readAsBase64(file){
+  return new Promise(res=>{
+    let r = new FileReader()
+    r.onload = e=>res(e.target.result)
+    r.readAsDataURL(file)
+  })
+}
+
+window.onload = updateUser
 </script>
 </body>
 </html>
+帮我预览一下
