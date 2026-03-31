@@ -132,7 +132,7 @@ async function upload() {
 
   localStorage.setItem('myList', JSON.stringify(list));
 
-  tip.style.innerText = '✅ 全部上传成功！';
+  tip.innerText = '✅ 全部上传成功！';
   setTimeout(() => show('my'), 1000);
   loadMyList();
   files = [];
